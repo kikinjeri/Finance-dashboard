@@ -74,11 +74,14 @@ export default function Stocks() {
     },
   ]);
 
+  const normalizeSparkline = (prices) => {
+    if (!prices || prices.length === 0) return [];
+    const start = prices[0];
+    return prices.map((p) => ({ value: ((p - start) / start) * 100 }));
+  };
+
   return (
-    <Paper
-      id="stocks" // <- Add this
-      sx={{ p: 3, pt: 12, minHeight: "100vh" }}
-    >
+    <Paper id="stocks" sx={{ p: 3, pt: 12, minHeight: "100vh" }}>
       <Typography variant="h5" gutterBottom>
         Stock Market
       </Typography>
@@ -88,7 +91,12 @@ export default function Stocks() {
             <TableCell>Symbol</TableCell>
             <TableCell>Price (USD)</TableCell>
             <TableCell>Change (%)</TableCell>
-            <TableCell>Trend (7d)</TableCell>
+            <TableCell>
+              Trend (7d)
+              <Typography variant="caption" display="block">
+                Relative % change over last 7 days
+              </Typography>
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -101,10 +109,10 @@ export default function Stocks() {
               </TableCell>
               <TableCell>
                 <ResponsiveContainer width={100} height={50}>
-                  <LineChart data={s.sparkline.map((p, i) => ({ price: p }))}>
+                  <LineChart data={normalizeSparkline(s.sparkline)}>
                     <Line
                       type="monotone"
-                      dataKey="price"
+                      dataKey="value"
                       stroke={s.change >= 0 ? "green" : "red"}
                       dot={false}
                     />

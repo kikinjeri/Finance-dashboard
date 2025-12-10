@@ -4,10 +4,12 @@ import App from "./App.jsx";
 
 import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
 
+// Global + existing CSS
+import "./global.css";
+import "./index.css";
+
 const theme = createTheme({
-  palette: {
-    mode: "dark", // optional
-  },
+  palette: { mode: "dark" },
 });
 
 ReactDOM.createRoot(document.getElementById("root")).render(

@@ -6,7 +6,6 @@ import {
   Card,
   CardContent,
   CardActionArea,
-  Link,
 } from "@mui/material";
 import axios from "axios";
 
@@ -15,7 +14,7 @@ export default function News() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const apiKey = "YOUR_API_KEY"; // Replace with your NewsData.io key
+    const apiKey = "pub_de2b127dbe824707884b998ca11646f1"; // replace with your key
     axios
       .get(
         `https://newsdata.io/api/1/news?apikey=${apiKey}&category=technology,business&language=en`
@@ -25,20 +24,12 @@ export default function News() {
           setArticles(res.data.results.slice(0, 10));
         }
       })
-      .catch((err) => console.error("Error fetching news:", err))
+      .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
   return (
-    <Paper
-      id="news"
-      sx={{
-        p: 3,
-        pt: 14, // leave space for fixed header
-        minHeight: "100vh",
-        backgroundColor: "#f5f5f5",
-      }}
-    >
+    <Paper id="news" sx={{ p: 3, pt: 14, minHeight: "100vh" }}>
       <Typography
         variant="h4"
         gutterBottom
@@ -49,7 +40,7 @@ export default function News() {
 
       {loading && <Typography>Loading news...</Typography>}
       {!loading && articles.length === 0 && (
-        <Typography>No news available at the moment.</Typography>
+        <Typography>No news available.</Typography>
       )}
 
       <Grid container spacing={3}>
@@ -60,8 +51,6 @@ export default function News() {
               <Card
                 sx={{
                   height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
                   transition: "transform 0.2s",
                   "&:hover": { transform: "scale(1.03)" },
                 }}

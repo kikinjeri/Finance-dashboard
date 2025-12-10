@@ -7,18 +7,11 @@ export default function Header() {
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
           Finance Dashboard
         </Typography>
-        <Button color="inherit" href="#news">
-          News
-        </Button>
-        <Button color="inherit" href="#crypto">
-          Crypto
-        </Button>
-        <Button color="inherit" href="#stocks">
-          Stocks
-        </Button>
-        <Button color="inherit" href="#budget">
-          Budget
-        </Button>
+        {["news", "crypto", "stocks", "budget"].map((section) => (
+          <Button color="inherit" key={section} href={`#${section}`}>
+            {section.charAt(0).toUpperCase() + section.slice(1)}
+          </Button>
+        ))}
       </Toolbar>
     </AppBar>
   );
