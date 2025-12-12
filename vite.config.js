@@ -3,12 +3,15 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  optimizeDeps: {
-    include: ['@mui/material', '@emotion/react', '@emotion/styled'],
-  },
   server: {
-    watch: {
-      usePolling: false, // faster on local FS
-    },
-  },
+    port: 5173,
+    host: true, // <--- listen on all network interfaces
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
+  }
 });

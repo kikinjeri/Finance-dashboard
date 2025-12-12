@@ -1,0 +1,8 @@
+App.css
+App.jsx
+assets/
+components/
+global.css
+index.css
+main.jsx
+structure.txt

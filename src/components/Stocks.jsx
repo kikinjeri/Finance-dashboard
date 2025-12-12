@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -9,70 +9,43 @@ import {
   Typography,
 } from "@mui/material";
 import { LineChart, Line, ResponsiveContainer } from "recharts";
+import { fetchStocks } from "../services/fetchStocks";
 
-export default function Stocks() {
-  const [stocks] = useState([
-    {
-      symbol: "AAPL",
-      price: 180,
-      change: 1.2,
-      sparkline: [178, 179, 180, 182, 181, 180, 180],
-    },
-    {
-      symbol: "TSLA",
-      price: 250,
-      change: -0.5,
-      sparkline: [252, 251, 250, 249, 250, 250, 250],
-    },
-    {
-      symbol: "GOOGL",
-      price: 2800,
-      change: 0.8,
-      sparkline: [2780, 2790, 2800, 2810, 2805, 2800, 2800],
-    },
-    {
-      symbol: "MSFT",
-      price: 305,
-      change: -0.3,
-      sparkline: [307, 306, 305, 304, 305, 305, 305],
-    },
-    {
-      symbol: "AMZN",
-      price: 3450,
-      change: 0.5,
-      sparkline: [3430, 3440, 3450, 3460, 3455, 3450, 3450],
-    },
-    {
-      symbol: "NFLX",
-      price: 510,
-      change: 1.0,
-      sparkline: [505, 508, 510, 512, 511, 510, 510],
-    },
-    {
-      symbol: "NVDA",
-      price: 420,
-      change: -0.7,
-      sparkline: [425, 423, 422, 421, 420, 420, 420],
-    },
-    {
-      symbol: "META",
-      price: 200,
-      change: 0.2,
-      sparkline: [198, 199, 200, 201, 200, 200, 200],
-    },
-    {
-      symbol: "IBM",
-      price: 130,
-      change: 0.1,
-      sparkline: [129, 129, 130, 131, 130, 130, 130],
-    },
-    {
-      symbol: "ORCL",
-      price: 90,
-      change: -0.4,
-      sparkline: [91, 90, 90, 89, 90, 90, 90],
-    },
-  ]);
+const mockStocks = [
+  { symbol: "AAPL", price: 180, change: 1.2, sparkline: [178, 180, 181] },
+  { symbol: "TSLA", price: 250, change: -0.5, sparkline: [251, 250, 249] },
+];
+
+export default function Stocks({ useMock = true }) {
+  const [stocks, setStocks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    setError(null);
+
+    if (useMock) {
+      setStocks(mockStocks);
+      setLoading(false);
+      return;
+    }
+
+    fetchStocks()
+      .then((data) => {
+        if (!mounted) return;
+        setStocks(data);
+      })
+      .catch((err) => {
+        console.error(err);
+        if (!mounted) return;
+        setError(err.message || "Error fetching stocks");
+      })
+      .finally(() => mounted && setLoading(false));
+
+    return () => (mounted = false);
+  }, [useMock]);
 
   const normalizeSparkline = (prices) => {
     if (!prices || prices.length === 0) return [];
@@ -85,20 +58,20 @@ export default function Stocks() {
       <Typography variant="h5" gutterBottom>
         Stock Market
       </Typography>
+
+      {loading && <Typography>Loading stocks...</Typography>}
+      {error && <Typography color="error">{error}</Typography>}
+
       <Table>
         <TableHead>
           <TableRow>
             <TableCell>Symbol</TableCell>
             <TableCell>Price (USD)</TableCell>
             <TableCell>Change (%)</TableCell>
-            <TableCell>
-              Trend (7d)
-              <Typography variant="caption" display="block">
-                Relative % change over last 7 days
-              </Typography>
-            </TableCell>
+            <TableCell>Trend (7d)</TableCell>
           </TableRow>
         </TableHead>
+
         <TableBody>
           {stocks.map((s) => (
             <TableRow key={s.symbol}>
