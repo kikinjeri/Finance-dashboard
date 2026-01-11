@@ -1,52 +1,52 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
+  Paper,
+  Typography,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-  Paper,
-  Typography,
+  Box,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Grid,
 } from "@mui/material";
 import { LineChart, Line, ResponsiveContainer } from "recharts";
 import { fetchStocks } from "../services/fetchStocks";
 
-const mockStocks = [
-  { symbol: "AAPL", price: 180, change: 1.2, sparkline: [178, 180, 181] },
-  { symbol: "TSLA", price: 250, change: -0.5, sparkline: [251, 250, 249] },
-];
-
-export default function Stocks({ useMock = true }) {
+export default function Stocks({ useMock = false }) {
   const [stocks, setStocks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+
+  const [sortBy, setSortBy] = useState("market_cap");
 
   useEffect(() => {
-    let mounted = true;
     setLoading(true);
-    setError(null);
 
-    if (useMock) {
-      setStocks(mockStocks);
-      setLoading(false);
-      return;
-    }
-
-    fetchStocks()
-      .then((data) => {
-        if (!mounted) return;
-        setStocks(data);
-      })
-      .catch((err) => {
-        console.error(err);
-        if (!mounted) return;
-        setError(err.message || "Error fetching stocks");
-      })
-      .finally(() => mounted && setLoading(false));
-
-    return () => (mounted = false);
+    fetchStocks(useMock)
+      .then((data) => setStocks(data || []))
+      .finally(() => setLoading(false));
   }, [useMock]);
 
+  // Safe sorting
+  const sortedStocks = useMemo(() => {
+    let list = [...stocks];
+
+    list.sort((a, b) => {
+      if (sortBy === "price") return (b.price || 0) - (a.price || 0);
+      if (sortBy === "change") return (b.change || 0) - (a.change || 0);
+      if (sortBy === "market_cap")
+        return (b.marketCap || 0) - (a.marketCap || 0);
+      return 0;
+    });
+
+    return list;
+  }, [stocks, sortBy]);
+
+  // Safe sparkline normalization
   const normalizeSparkline = (prices) => {
     if (!prices || prices.length === 0) return [];
     const start = prices[0];
@@ -54,43 +54,82 @@ export default function Stocks({ useMock = true }) {
   };
 
   return (
-    <Paper id="stocks" sx={{ p: 3, pt: 12, minHeight: "100vh" }}>
-      <Typography variant="h5" gutterBottom>
-        Stock Market
+    <Paper id="stocks" sx={{ p: 3, borderRadius: 3 }}>
+      <Typography
+        variant="h4"
+        sx={{ fontWeight: "bold", mb: 4, textAlign: "center" }}
+      >
+        Stock Market Overview
       </Typography>
 
-      {loading && <Typography>Loading stocks...</Typography>}
-      {error && <Typography color="error">{error}</Typography>}
+      {/* Sorting */}
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        <Grid item xs={12} md={4}>
+          <FormControl fullWidth>
+            <InputLabel>Sort By</InputLabel>
+            <Select
+              value={sortBy}
+              label="Sort By"
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <MenuItem value="market_cap">Market Cap</MenuItem>
+              <MenuItem value="price">Price</MenuItem>
+              <MenuItem value="change">24h Change</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+      </Grid>
 
+      {/* Stocks Table */}
       <Table>
         <TableHead>
           <TableRow>
             <TableCell>Symbol</TableCell>
             <TableCell>Price (USD)</TableCell>
-            <TableCell>Change (%)</TableCell>
-            <TableCell>Trend (7d)</TableCell>
+            <TableCell>24h Change</TableCell>
+            <TableCell>Market Cap</TableCell>
+            <TableCell>7d Trend</TableCell>
           </TableRow>
         </TableHead>
 
         <TableBody>
-          {stocks.map((s) => (
+          {sortedStocks.map((s) => (
             <TableRow key={s.symbol}>
-              <TableCell>{s.symbol}</TableCell>
-              <TableCell>${s.price.toLocaleString()}</TableCell>
-              <TableCell sx={{ color: s.change >= 0 ? "green" : "red" }}>
-                {s.change}%
-              </TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>{s.symbol}</TableCell>
+
               <TableCell>
-                <ResponsiveContainer width={100} height={50}>
-                  <LineChart data={normalizeSparkline(s.sparkline)}>
-                    <Line
-                      type="monotone"
-                      dataKey="value"
-                      stroke={s.change >= 0 ? "green" : "red"}
-                      dot={false}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+                {s.price ? `$${s.price.toLocaleString()}` : "—"}
+              </TableCell>
+
+              <TableCell
+                sx={{
+                  color: s.change >= 0 ? "green" : "red",
+                  fontWeight: "bold",
+                }}
+              >
+                {s.change ? `${s.change}%` : "—"}
+              </TableCell>
+
+              <TableCell>
+                {s.marketCap ? `$${s.marketCap.toLocaleString()}` : "—"}
+              </TableCell>
+
+              <TableCell>
+                {s.sparkline && s.sparkline.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={50}>
+                    <LineChart data={normalizeSparkline(s.sparkline)}>
+                      <Line
+                        type="monotone"
+                        dataKey="value"
+                        stroke={s.change >= 0 ? "green" : "red"}
+                        dot={false}
+                        strokeWidth={2}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  "—"
+                )}
               </TableCell>
             </TableRow>
           ))}

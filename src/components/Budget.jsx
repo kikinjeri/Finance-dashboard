@@ -81,7 +81,7 @@ export default function Budget() {
   const expenseData = budget.filter((b) => b.name !== "Income");
 
   return (
-    <Paper id="budget" sx={{ p: 3, pt: 12, minHeight: "100vh" }}>
+    <Paper id="budget" sx={{ p: 3 }}>
       <Typography variant="h5" gutterBottom textAlign="center">
         Personal Budget
       </Typography>
@@ -127,8 +127,9 @@ export default function Budget() {
             ))}
           </Stack>
 
-          <Box sx={{ width: "100%", height: 300 }}>
-            <ResponsiveContainer width="100%" height="100%">
+          {/* Pie chart container */}
+          <Box sx={{ width: "100%", minHeight: 300 }}>
+            <ResponsiveContainer width="100%" aspect={1.2}>
               <PieChart>
                 <Pie
                   data={expenseData}
@@ -158,6 +159,7 @@ export default function Budget() {
                 <TableCell>Amount ($)</TableCell>
               </TableRow>
             </TableHead>
+
             <TableBody>
               {budget.map((b, i) => (
                 <TableRow key={b.name}>
@@ -180,10 +182,12 @@ export default function Budget() {
                 <TableCell>Total Income</TableCell>
                 <TableCell>${totalIncome}</TableCell>
               </TableRow>
+
               <TableRow>
                 <TableCell>Total Expenses</TableCell>
                 <TableCell>${totalExpenses}</TableCell>
               </TableRow>
+
               <TableRow>
                 <TableCell>Balance</TableCell>
                 <TableCell sx={{ color: balance >= 0 ? "green" : "red" }}>
@@ -204,6 +208,7 @@ export default function Budget() {
                     fullWidth
                   />
                 </TableCell>
+
                 <TableCell>
                   <TextField
                     placeholder="Amount"
@@ -216,6 +221,7 @@ export default function Budget() {
                     fullWidth
                   />
                 </TableCell>
+
                 <TableCell>
                   <Button variant="contained" onClick={handleAdd} size="small">
                     Add
@@ -242,6 +248,7 @@ export default function Budget() {
                         ))}
                     </Select>
                   </FormControl>
+
                   <Button
                     variant="outlined"
                     color="error"

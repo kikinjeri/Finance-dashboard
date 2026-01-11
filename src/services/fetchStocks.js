@@ -1,28 +1,30 @@
 // /src/services/fetchStocks.js
 const API_KEY = import.meta.env.VITE_STOCKS_API_KEY;
 
-export async function fetchStocks(symbols = ["AAPL", "TSLA", "GOOGL", "MSFT", "AMZN"]) {
+export async function fetchStocks(
+  symbols = ["AAPL", "TSLA", "GOOGL", "MSFT", "AMZN"]
+) {
   const results = [];
 
   for (const sym of symbols) {
     try {
       if (!API_KEY) {
-        throw new Error("Missing VITE_STOCKS_API_KEY in environment. Add it to .env as VITE_STOCKS_API_KEY=<key>");
+        throw new Error(
+          "Missing VITE_STOCKS_API_KEY in environment. Add it to .env as VITE_STOCKS_API_KEY=<key>"
+        );
       }
-      const url =
+
+      // 1. Fetch daily prices
+      const priceUrl =
         `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY` +
         `&symbol=${sym}&apikey=${API_KEY}`;
 
-      const res = await fetch(url);
-      if (!res.ok) {
-        console.error(`AlphaVantage returned ${res.status} for ${sym}`);
-        continue;
-      }
+      const priceRes = await fetch(priceUrl);
+      const priceData = await priceRes.json();
 
-      const data = await res.json();
-      const series = data["Time Series (Daily)"];
+      const series = priceData["Time Series (Daily)"];
       if (!series) {
-        console.error(`No time series for ${sym}:`, data);
+        console.error(`No time series for ${sym}:`, priceData);
         continue;
       }
 
@@ -31,10 +33,26 @@ export async function fetchStocks(symbols = ["AAPL", "TSLA", "GOOGL", "MSFT", "A
         .map((d) => parseFloat(d["4. close"]))
         .reverse();
 
+      const latestPrice = prices[prices.length - 1];
+      const firstPrice = prices[0];
+      const changePct = ((latestPrice - firstPrice) / firstPrice) * 100;
+
+      // 2. Fetch market cap (OVERVIEW endpoint)
+      const overviewUrl =
+        `https://www.alphavantage.co/query?function=OVERVIEW` +
+        `&symbol=${sym}&apikey=${API_KEY}`;
+
+      const overviewRes = await fetch(overviewUrl);
+      const overviewData = await overviewRes.json();
+
+      const marketCap = parseFloat(overviewData.MarketCapitalization) || null;
+
+      // 3. Push clean, consistent object
       results.push({
         symbol: sym,
-        price: prices[prices.length - 1],
-        change: (((prices[prices.length - 1] - prices[0]) / prices[0]) * 100).toFixed(2),
+        price: latestPrice,
+        change: Number(changePct.toFixed(2)),
+        marketCap,
         sparkline: prices,
       });
     } catch (err) {
@@ -44,7 +62,9 @@ export async function fetchStocks(symbols = ["AAPL", "TSLA", "GOOGL", "MSFT", "A
   }
 
   if (results.length === 0) {
-    throw new Error("No stock data could be fetched. Check API key or rate limits.");
+    throw new Error(
+      "No stock data could be fetched. Check API key or rate limits."
+    );
   }
 
   return results;

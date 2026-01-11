@@ -1,17 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.jsx";
-import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
+import App from "./App";
+import { ThemeProvider, CssBaseline } from "@mui/material";
+import { getTheme } from "./theme";
 
-import "./index.css";
+function Root() {
+  const [mode, setMode] = useState("light");
 
-const theme = createTheme({ palette: { mode: "dark" } });
-
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <ThemeProvider theme={theme}>
+  return (
+    <ThemeProvider theme={getTheme(mode)}>
       <CssBaseline />
-      <App />
+      <App mode={mode} setMode={setMode} />
     </ThemeProvider>
-  </React.StrictMode>
-);
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<Root />);

@@ -6,51 +6,102 @@ import {
   Card,
   CardContent,
   CardActionArea,
+  Chip,
+  Box,
 } from "@mui/material";
 import { fetchNews } from "../services/fetchNews";
 
-const mockArticles = [
-  {
-    title: "Tech News 1",
-    description: "Lorem ipsum...",
-    link: "#",
-    source_id: "MockSource",
-  },
-  {
-    title: "Tech News 2",
-    description: "Lorem ipsum...",
-    link: "#",
-    source_id: "MockSource",
-  },
-];
+function NewsGrid({ articles }) {
+  return (
+    <Grid container columns={12} spacing={3}>
+      {articles.map((a, i) => (
+        <Grid key={i} size={{ xs: 12, sm: 6, md: 4 }}>
+          <Card
+            sx={{
+              height: "100%",
+              borderRadius: 3,
+              boxShadow: 3,
+              display: "flex",
+              flexDirection: "column",
+              transition: "transform 0.2s",
+              "&:hover": { transform: "translateY(-4px)" },
+            }}
+          >
+            <CardActionArea href={a.link} target="_blank" sx={{ flexGrow: 1 }}>
+              <CardContent
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  height: "100%",
+                }}
+              >
+                <Typography variant="h6" sx={{ fontWeight: "bold", mb: 1 }}>
+                  {a.title}
+                </Typography>
 
-export default function News({ useMock = true }) {
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 2, flexGrow: 1 }}
+                >
+                  {a.description?.slice(0, 140) || ""}...
+                </Typography>
+
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Chip
+                    label={a.category?.[0] || "General"}
+                    size="small"
+                    sx={{ textTransform: "capitalize" }}
+                  />
+                  <Typography variant="caption" color="text.secondary">
+                    {a.source_id || "Unknown source"}
+                  </Typography>
+                </Box>
+              </CardContent>
+            </CardActionArea>
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
+  );
+}
+
+export default function News({ useMock = false }) {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     setError(null);
-    if (useMock) {
-      setArticles(mockArticles);
-      setLoading(false);
-      return;
-    }
+    setLoading(true);
 
     fetchNews()
-      .then((data) => setArticles(data))
+      .then((data) => {
+        console.log("NEWS DATA:", data);
+
+        const filteredArticles = data.filter((a) =>
+          ["technology", "business"].some((cat) => a.category?.includes(cat))
+        );
+
+        setArticles(filteredArticles.slice(0, 12));
+      })
       .catch((err) => {
-        console.error(err);
+        console.error("NEWS ERROR:", err);
         setError(err.message || "Error fetching news");
       })
       .finally(() => setLoading(false));
   }, [useMock]);
 
   return (
-    <Paper id="news" sx={{ p: 3, pt: 14, minHeight: "100vh" }}>
+    <Paper id="news" sx={{ p: 4, borderRadius: 4 }}>
       <Typography
         variant="h4"
-        gutterBottom
         sx={{ fontWeight: "bold", mb: 4, textAlign: "center" }}
       >
         Tech & Business News
@@ -58,41 +109,8 @@ export default function News({ useMock = true }) {
 
       {loading && <Typography>Loading news...</Typography>}
       {error && <Typography color="error">{error}</Typography>}
-      {!loading && !error && articles.length === 0 && (
-        <Typography>No news available.</Typography>
-      )}
 
-      <Grid container spacing={3}>
-        {articles.map((a, i) => (
-          <Grid item xs={12} sm={6} md={4} key={i}>
-            <Card
-              sx={{
-                height: "100%",
-                transition: "transform 0.2s",
-                "&:hover": { transform: "scale(1.03)" },
-              }}
-            >
-              <CardActionArea href={a.link} target="_blank">
-                <CardContent>
-                  <Typography variant="h6" sx={{ fontWeight: "bold", mb: 1 }}>
-                    {a.title}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mb: 1 }}
-                  >
-                    {a.description}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {a.source_id || "Unknown source"}
-                  </Typography>
-                </CardContent>
-              </CardActionArea>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+      {!loading && !error && <NewsGrid articles={articles} />}
     </Paper>
   );
 }
