@@ -114,6 +114,9 @@ export default function Crypto({ useMock = false }) {
             p: 2,
             borderRadius: 3,
             backgroundColor: "rgba(255,255,255,0.05)",
+            flexDirection: { xs: "column", sm: "row" },
+            gap: { xs: 2, sm: 0 },
+            textAlign: "center",
           }}
         >
           <Box>
@@ -139,6 +142,7 @@ export default function Crypto({ useMock = false }) {
         </Box>
       )}
 
+      {/* Search + Filters */}
       <Grid container spacing={3} sx={{ mb: 3, alignItems: "center" }}>
         <Grid item xs={12} md={4}>
           <TextField
@@ -151,46 +155,47 @@ export default function Crypto({ useMock = false }) {
 
         <Grid item xs={12} md={8}>
           <ButtonGroup variant="outlined" fullWidth>
-            <Button
-              onClick={() => setPriceRange("all")}
-              variant={priceRange === "all" ? "contained" : "outlined"}
-            >
-              All
-            </Button>
-            <Button
-              onClick={() => setPriceRange("under1")}
-              variant={priceRange === "under1" ? "contained" : "outlined"}
-            >
-              Under $1
-            </Button>
-            <Button
-              onClick={() => setPriceRange("1to10")}
-              variant={priceRange === "1to10" ? "contained" : "outlined"}
-            >
-              $1–$10
-            </Button>
-            <Button
-              onClick={() => setPriceRange("10to100")}
-              variant={priceRange === "10to100" ? "contained" : "outlined"}
-            >
-              $10–$100
-            </Button>
-            <Button
-              onClick={() => setPriceRange("100to1000")}
-              variant={priceRange === "100to1000" ? "contained" : "outlined"}
-            >
-              $100–$1,000
-            </Button>
-            <Button
-              onClick={() => setPriceRange("1000plus")}
-              variant={priceRange === "1000plus" ? "contained" : "outlined"}
-            >
-              $1,000+
-            </Button>
+            {[
+              ["all", "All"],
+              ["under1", "Under $1"],
+              ["1to10", "$1–$10"],
+              ["10to100", "$10–$100"],
+              ["100to1000", "$100–$1,000"],
+              ["1000plus", "$1,000+"],
+            ].map(([key, label]) => (
+              <Button
+                key={key}
+                onClick={() => setPriceRange(key)}
+                variant={priceRange === key ? "contained" : "outlined"}
+              >
+                {label}
+              </Button>
+            ))}
           </ButtonGroup>
         </Grid>
       </Grid>
 
+      {/* Desktop Header */}
+      <Box
+        sx={{
+          display: { xs: "none", sm: "flex" },
+          alignItems: "center",
+          justifyContent: "space-between",
+          p: 2,
+          mb: 1,
+          fontWeight: "bold",
+          opacity: 0.8,
+          borderBottom: "2px solid rgba(255,255,255,0.2)",
+        }}
+      >
+        <Box sx={{ flex: "1 1 200px", maxWidth: 200 }}>Coin</Box>
+        <Box sx={{ width: 120, textAlign: "right" }}>Price</Box>
+        <Box sx={{ width: 120, textAlign: "right" }}>24h Change</Box>
+        <Box sx={{ width: 160, textAlign: "right" }}>Market Cap</Box>
+        <Box sx={{ width: 160, textAlign: "right" }}>7‑Day Trend</Box>
+      </Box>
+
+      {/* Rows */}
       {filteredCoins.map((c) => {
         const spark = c.sparkline_in_7d?.price || [];
         const change = c.price_change_percentage_24h ?? 0;
@@ -200,46 +205,93 @@ export default function Crypto({ useMock = false }) {
           <Box
             key={c.id}
             sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
               p: 2,
               borderBottom: "1px solid rgba(255,255,255,0.1)",
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
+              gap: { xs: 2, sm: 0 },
+              alignItems: { xs: "flex-start", sm: "center" },
+              justifyContent: "space-between",
             }}
           >
+            {/* Coin */}
             <Box
               sx={{
-                flex: "1 1 200px",
-                maxWidth: 200,
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
+                flex: "1 1 auto",
+                minWidth: { xs: "100%", sm: 200 },
                 fontWeight: "bold",
               }}
             >
               {c.name} ({c.symbol.toUpperCase()})
             </Box>
 
-            <Box sx={{ width: 120, textAlign: "right" }}>
+            {/* Price */}
+            <Box sx={{ width: { xs: "100%", sm: 120 }, textAlign: "right" }}>
+              <Typography
+                sx={{
+                  display: { xs: "block", sm: "none" },
+                  opacity: 0.6,
+                  mb: 0.5,
+                }}
+              >
+                Price
+              </Typography>
               ${c.current_price?.toLocaleString() || "—"}
             </Box>
 
+            {/* Change */}
             <Box
               sx={{
-                width: 120,
+                width: { xs: "100%", sm: 120 },
                 textAlign: "right",
                 color: change >= 0 ? "green" : "red",
                 fontWeight: "bold",
               }}
             >
+              <Typography
+                sx={{
+                  display: { xs: "block", sm: "none" },
+                  opacity: 0.6,
+                  mb: 0.5,
+                }}
+              >
+                24h Change
+              </Typography>
               {change.toFixed(2)}%
             </Box>
 
-            <Box sx={{ width: 160, textAlign: "right" }}>
+            {/* Market Cap */}
+            <Box sx={{ width: { xs: "100%", sm: 160 }, textAlign: "right" }}>
+              <Typography
+                sx={{
+                  display: { xs: "block", sm: "none" },
+                  opacity: 0.6,
+                  mb: 0.5,
+                }}
+              >
+                Market Cap
+              </Typography>
               {marketCap ? `$${marketCap.toLocaleString()}` : "—"}
             </Box>
 
-            <Box sx={{ width: 160, height: 50 }}>
+            {/* Sparkline */}
+            <Box
+              sx={{
+                width: { xs: "100%", sm: 160 },
+                height: 50,
+                mt: { xs: 1, sm: 0 },
+              }}
+            >
+              <Typography
+                sx={{
+                  display: { xs: "block", sm: "none" },
+                  opacity: 0.6,
+                  mb: 0.5,
+                }}
+              >
+                7‑Day Trend
+              </Typography>
+
               <Sparklines data={spark} width={160} height={50}>
                 <SparklinesLine color={change >= 0 ? "green" : "red"} />
               </Sparklines>

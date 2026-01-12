@@ -58,13 +58,13 @@ screensot/
   (extra slot)
 🖼️ Screenshots
 📈 Crypto Market
-[Looks like the result wasn't safe to show. Let's switch things up and try something else!]
+[alt text](Crypto-2.png)
 
 📰 News
-[Looks like the result wasn't safe to show. Let's switch things up and try something else!]
+![alt text](News-1.png)
 
 💰 Budget
-[Looks like the result wasn't safe to show. Let's switch things up and try something else!]
+![alt text](Budget.png)
 
 🔧 Additional Screenshot
 [Looks like the result wasn't safe to show. Let's switch things up and try something else!]

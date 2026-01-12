@@ -11,6 +11,9 @@ import {
 } from "@mui/material";
 import { fetchNews } from "../services/fetchNews";
 
+// Ensure Montserrat is loaded globally in index.html:
+// <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
 function NewsGrid({ articles }) {
   return (
     <Grid container columns={12} spacing={3}>
@@ -24,6 +27,7 @@ function NewsGrid({ articles }) {
               display: "flex",
               flexDirection: "column",
               transition: "transform 0.2s",
+              fontFamily: "Montserrat, Calibri, sans-serif",
               "&:hover": { transform: "translateY(-4px)" },
             }}
           >
@@ -33,16 +37,29 @@ function NewsGrid({ articles }) {
                   display: "flex",
                   flexDirection: "column",
                   height: "100%",
+                  fontFamily: "Montserrat, Calibri, sans-serif",
                 }}
               >
-                <Typography variant="h6" sx={{ fontWeight: "bold", mb: 1 }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: "600",
+                    mb: 1,
+                    fontFamily: "Montserrat, Calibri, sans-serif",
+                  }}
+                >
                   {a.title}
                 </Typography>
 
                 <Typography
                   variant="body2"
                   color="text.secondary"
-                  sx={{ mb: 2, flexGrow: 1 }}
+                  sx={{
+                    mb: 2,
+                    flexGrow: 1,
+                    fontFamily: "Montserrat, Calibri, sans-serif",
+                    lineHeight: 1.5,
+                  }}
                 >
                   {a.description?.slice(0, 140) || ""}...
                 </Typography>
@@ -52,14 +69,22 @@ function NewsGrid({ articles }) {
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
+                    fontFamily: "Montserrat, Calibri, sans-serif",
                   }}
                 >
                   <Chip
                     label={a.category?.[0] || "General"}
                     size="small"
-                    sx={{ textTransform: "capitalize" }}
+                    sx={{
+                      textTransform: "capitalize",
+                      fontFamily: "Montserrat, Calibri, sans-serif",
+                    }}
                   />
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ fontFamily: "Montserrat, Calibri, sans-serif" }}
+                  >
                     {a.source_id || "Unknown source"}
                   </Typography>
                 </Box>
@@ -99,16 +124,40 @@ export default function News({ useMock = false }) {
   }, [useMock]);
 
   return (
-    <Paper id="news" sx={{ p: 4, borderRadius: 4 }}>
+    <Paper
+      id="news"
+      sx={{
+        p: 4,
+        borderRadius: 4,
+        fontFamily: "Montserrat, Calibri, sans-serif",
+      }}
+    >
       <Typography
         variant="h4"
-        sx={{ fontWeight: "bold", mb: 4, textAlign: "center" }}
+        sx={{
+          fontWeight: "700",
+          mb: 4,
+          textAlign: "center",
+          fontFamily: "Montserrat, Calibri, sans-serif",
+        }}
       >
         Tech & Business News
       </Typography>
 
-      {loading && <Typography>Loading news...</Typography>}
-      {error && <Typography color="error">{error}</Typography>}
+      {loading && (
+        <Typography sx={{ fontFamily: "Montserrat, Calibri, sans-serif" }}>
+          Loading news...
+        </Typography>
+      )}
+
+      {error && (
+        <Typography
+          color="error"
+          sx={{ fontFamily: "Montserrat, Calibri, sans-serif" }}
+        >
+          {error}
+        </Typography>
+      )}
 
       {!loading && !error && <NewsGrid articles={articles} />}
     </Paper>
